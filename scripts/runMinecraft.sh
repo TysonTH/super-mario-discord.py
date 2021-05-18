@@ -1,0 +1,1 @@
+screen -d -m -S minecraft "/directory/to/your/minecraft/server/start/script/here/test.sh"
