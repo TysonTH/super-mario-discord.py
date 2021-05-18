@@ -1,0 +1,13 @@
+# .env
+
+#Bot Information
+token = 'id'
+guild = 'placeholder'
+
+#Scripts
+
+minecraftServer = 'scripts/runMinecraft.sh'
+
+#Sounds
+
+hello = 'sounds/hello.wav'
