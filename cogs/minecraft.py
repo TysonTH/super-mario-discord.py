@@ -8,10 +8,10 @@ from os import path
 load_dotenv()
 
 #Channels
-announcements = int(os.getenv('general'))
+announcements = int(os.getenv('serverStatus'))
 
 #Directories
-coordinateDatabase = str(os.getenv('coordinateDatabase'))
+coordinatesDirectory = str(os.getenv('coordinatesDirectory'))
 
 #Links
 minecraftDirectory = str(os.getenv('minecraftDirectory'))
@@ -44,7 +44,7 @@ class Minecraft(commands.Cog):
 						   '$coordinates delete [tag], Example: $coordinates delete home```')
 			
 		else:
-			filename = coordinateDatabase + args[1] + ".txt"
+			filename = coordinatesDirectory + args[1] + ".txt"
 		
 			#If the user sends more than 4 arguments
 			if len(args) > 5:
@@ -73,11 +73,16 @@ class Minecraft(commands.Cog):
 			#Read the coordinates out to the user
 			elif args[0] == "get":
 			
-				locationFile = open(filename, "r")
-				location = locationFile.read()
+				if path.exists(filename) == True:
+					
+					locationFile = open(filename, "r")
+					location = locationFile.read()
 		
-				await ctx.send('Coordinates: ' + location)
-				locationFile.close()
+					await ctx.send('Coordinates: ' + location)
+					locationFile.close()
+				
+				else: 
+					await ctx.send("`" + args[1] + "` does not exist!")
 		
 			#Overwrite a set of coordinates
 			elif args[0] == "replace" or args[0] == "overwrite":
@@ -118,8 +123,8 @@ class Minecraft(commands.Cog):
 	#Error Handlers
 		
 	@coordinates.error
-	async def coordinates_error(self, error, ctx):
-		await error.send("Your parameters are incorrect, try again!")
+	async def coordinatesError(self, ctx, error):
+		await ctx.send("Your parameters are incorrect, try again!")
 	
 #Functions
 
@@ -132,3 +137,4 @@ def log(text):
 	
 #To do list
 	#Rework $coordinates command to store as a dictionary instead of individual text files
+	#Add minimum parameter check to $coordinates make
