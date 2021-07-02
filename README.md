@@ -5,10 +5,12 @@ This was written with only private use  in mind, so it does not have any securit
 
 This has not been tested on Windows so it assumes you will be running this under Debian Linux and a bash shell.
 
-Requirements for the bot to run properly are:
+## Requirements
 
 `pip install python-dotenv`
 `pip install discord.py`
+
+## Configuration
 
 You will also need to fill in the bot token and other information in the .env files stored in root and cogs folders.
 
