@@ -25,4 +25,5 @@ Sounds are also not provided as they are copyrighted material but a list of soun
 ## Planned Features
 
 **Interface with Minecraft server via [mcstatus](https://github.com/Dinnerbone/mcstatus) to provide further support for players**
+
 **Disable and enable commands through Discord server to require less editing of the python files**
