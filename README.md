@@ -9,6 +9,7 @@ This has not been tested on Windows so it assumes you will be running this under
 
 `pip install python-dotenv`
 `pip install discord.py`
+`pip install mcstatus`
 
 ## Configuration
 
@@ -24,8 +25,8 @@ Sounds are also not provided as they are copyrighted material but a list of soun
 
 **Tools to increase game immersion such as storing Minecraft coordinates (still a rudimentary system) and more...**
 
-## Planned Features
-
 **Interface with Minecraft server via [mcstatus](https://github.com/Dinnerbone/mcstatus) to provide further support for players**
+
+## Planned Features
 
 **Disable and enable commands through Discord server to require less editing of the python files**
