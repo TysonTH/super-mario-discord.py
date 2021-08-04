@@ -1,8 +1,11 @@
 import discord
 import os
 import os.path
+import socket
 from discord.ext import commands
+from discord.ext.commands import cooldown, BucketType
 from dotenv import load_dotenv
+from mcstatus import MinecraftServer
 from os import path
 
 load_dotenv()
@@ -13,8 +16,13 @@ announcements = int(os.getenv('serverStatus'))
 #Directories
 coordinatesDirectory = str(os.getenv('coordinatesDirectory'))
 
+#Open Ports
+minecraftPort = int(os.getenv('minecraftPort'))
+minecraftQueryPort = int(os.getenv('minecraftQueryPort'))
+
 #Links
 minecraftDirectory = str(os.getenv('minecraftDirectory'))
+
 
 class Minecraft(commands.Cog):
 
@@ -115,16 +123,49 @@ class Minecraft(commands.Cog):
 				else:
 					await ctx.send('These coordinates do not exist, check to make sure the name is correct.')
 					
+	@commands.command(aliases = ['minecraft'], brief = 'Subset of tools for Minecraft, refer to $mc usage')
+	@commands.cooldown(1.0, 5.0, BucketType.guild)
+	async def mc(self, ctx, *, arg):
 		
-	@commands.command()
-	async def mods(self, ctx):
-		await ctx.send(minecraftDirectory)
+		if arg == "mods":
+			await ctx.send(minecraftDirectory)
+			
+		elif arg == "status":
+			
+			#Pull computer's local IP address and port number
+			serverAddress = MinecraftServer(str(socket.gethostbyname(socket.gethostname())), minecraftPort)
+			
+			#Record status and output to user
+			status = serverAddress.status()
+			await ctx.send("`{0}` is currently online with {1} player(s) and responded in `{2}μs`".format(status.description, status.players.online, status.latency * 1000))
+			
+		elif arg == "query":
+			
+			#Same as status but must have query enabled
+			serverAddress = MinecraftServer(str(socket.gethostbyname(socket.gethostname())), minecraftQueryPort)
+			query = serverAddress.query()
+			
+			if len(query.players.names) == 0:
+				await ctx.send("`{0}` has no players online.".format(query.motd))
+				
+			else:
+				await ctx.send("`{0}` has the following players online: ```\n{1}```".format(query.motd, ", ".join(query.players.names)))
 		
 	#Error Handlers
 		
 	@coordinates.error
 	async def coordinatesError(self, ctx, error):
 		await ctx.send("Your parameters are incorrect, try again!")
+		
+	@mc.error
+	async def mcError(self, ctx, error):
+	
+		#Check if currently on cooldown
+		if isinstance(error, commands.CommandOnCooldown):
+			await ctx.send('This command has a 5 second cooldown. You may use it again in `{:.2f}s`'.format(error.retry_after))
+	
+		else:
+			await ctx.send("The server is either down, has query disabled and/or the host's ports may not be properly forwarded.")
 	
 #Functions
 
