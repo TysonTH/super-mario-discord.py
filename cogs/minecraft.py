@@ -1,27 +1,28 @@
+import botConfig
 import discord
+import minecraftConfig
 import os
 import os.path
-import socket
 from discord.ext import commands
 from discord.ext.commands import cooldown, BucketType
-from dotenv import load_dotenv
 from mcstatus import MinecraftServer
 from os import path
 
-load_dotenv()
+#Bot Config
+prefix = botConfig.prefix
 
 #Channels
-announcements = int(os.getenv('serverStatus'))
+announcements = minecraftConfig.serverStatus
 
 #Directories
-coordinatesDirectory = str(os.getenv('coordinatesDirectory'))
+coordinatesDirectory = minecraftConfig.coordinatesDirectory
 
 #Open Ports
-minecraftPort = int(os.getenv('minecraftPort'))
-minecraftQueryPort = int(os.getenv('minecraftQueryPort'))
+minecraftPort = minecraftConfig.minecraftPort
+minecraftQueryPort = minecraftConfig.minecraftQueryPort
 
 #Links
-minecraftDirectory = str(os.getenv('minecraftDirectory'))
+modsDirectory = minecraftConfig.modsDirectory
 
 
 class Minecraft(commands.Cog):
@@ -38,20 +39,21 @@ class Minecraft(commands.Cog):
 		#Inform users that the Minecraft server can now be initialized.
 		channel = self.client.get_channel(announcements)
 		
-		await channel.send('[Minecraft]: The server computer has successfully logged in, you can now start the Minecraft server with:\n`$run minecraft`')
+		await channel.send('[Minecraft]: The server computer has successfully logged in, you can now start the Minecraft server with:\n`{0}run minecraft`'.format(prefix))
 		log('Users have been informed the Minecraft server can now be started.')
 		
 	
-	@commands.command(aliases = ['coords'], brief = 'Allows users to store coordinates into a directory', description = 'Store a set of coordinates with a corresponding tag, type $coordinates usage for more info.')
+	@commands.command(aliases = ['coords'], brief = 'Allows users to store coordinates into a directory', description = 'Store a set of coordinates with a corresponding tag, type {0}coordinates usage for more info.'.format(prefix))
 	async def coordinates(self, ctx, *args):
 		
 		if args[0] == "usage":
-			await ctx.send('```$coordinates make [tag] [x] [y] [z], Example: $coordinates make home -1000 64 2000\n' +
-						   '$coordinates get [tag], Example: $coordinates get home\n' +
-						   '$coordinates replace [tag] [x] [y] [z], Example: $coordinates replace home -3000 72 2500\n' +
-						   '$coordinates delete [tag], Example: $coordinates delete home```')
+			await ctx.send('```{0}coordinates make [tag] [x] [y] [z], Example: {0}coordinates make home -1000 64 2000\n'.format(prefix) +
+						   '{0}coordinates get [tag], Example: {0}coordinates get home\n'.format(prefix) +
+						   '{0}coordinates replace [tag] [x] [y] [z], Example: {0}coordinates replace home -3000 72 2500\n'.format(prefix) +
+						   '{0}coordinates delete [tag], Example: {0}coordinates delete home```'.format(prefix))
 			
 		else:
+			#Open coordinatesDirectory as stored in minecraftConfig.py
 			filename = coordinatesDirectory + args[1] + ".txt"
 		
 			#If the user sends more than 4 arguments
@@ -76,7 +78,7 @@ class Minecraft(commands.Cog):
 				#Inform the user this set already exists
 				else:
 					await ctx.send("The name you've selected for your location already exists! Please use another and try again" +
-							   	"or use `$coordinates replace [tag] [x] [y] [z]` (no square brackets).")
+							   	"or use `{0}coordinates replace [tag] [x] [y] [z]` (no square brackets).".format(prefix))
 		
 			#Read the coordinates out to the user
 			elif args[0] == "get":
@@ -123,17 +125,17 @@ class Minecraft(commands.Cog):
 				else:
 					await ctx.send('These coordinates do not exist, check to make sure the name is correct.')
 					
-	@commands.command(aliases = ['minecraft'], brief = 'Subset of tools for Minecraft, refer to $mc usage')
+	@commands.command(aliases = ['minecraft'], brief = 'Subset of tools for Minecraft, refer to {0}mc usage'.format(prefix))
 	@commands.cooldown(1.0, 5.0, BucketType.guild)
 	async def mc(self, ctx, *, arg):
 		
 		if arg == "mods":
-			await ctx.send(minecraftDirectory)
+			await ctx.send(modsDirectory)
 			
 		elif arg == "status":
 			
 			#Pull computer's local IP address and port number
-			serverAddress = MinecraftServer(str(socket.gethostbyname(socket.gethostname())), minecraftPort)
+			serverAddress = MinecraftServer('localhost', minecraftPort)
 			
 			#Record status and output to user
 			status = serverAddress.status()
@@ -141,13 +143,15 @@ class Minecraft(commands.Cog):
 			
 		elif arg == "query":
 			
-			#Same as status but must have query enabled
-			serverAddress = MinecraftServer(str(socket.gethostbyname(socket.gethostname())), minecraftQueryPort)
+			#Same as status, but must have query enabled
+			serverAddress = MinecraftServer('localhost', minecraftQueryPort)
 			query = serverAddress.query()
 			
+			#If list of players is empty, inform the users the server is vacant.
 			if len(query.players.names) == 0:
 				await ctx.send("`{0}` has no players online.".format(query.motd))
 				
+			#List players currently in-game	
 			else:
 				await ctx.send("`{0}` has the following players online: ```\n{1}```".format(query.motd, ", ".join(query.players.names)))
 		
@@ -177,5 +181,5 @@ def log(text):
 	print('[Minecraft]: ' + text)
 	
 #To do list
-	#Rework $coordinates command to store as a dictionary instead of individual text files
-	#Add minimum parameter check to $coordinates make
+	#Rework {0}coordinates command to store as a dictionary instead of individual text files
+	#Add minimum parameter check to {0}coordinates make
