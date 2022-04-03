@@ -9,7 +9,7 @@ This has not been tested on Windows so it assumes you will be running this under
 
 `pip install discord.py`
 `pip install mcstatus`
-`pip install speedtest`
+`pip install speedtest-cli`
 
 ## Configuration
 
